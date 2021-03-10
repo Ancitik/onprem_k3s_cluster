@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-dashboard-auth
+  namespace: traefik
+data:
+  # This is the base64 and openssl encoded version of "user" as user and "password" as password
+  users: dXNlcjokYXByMSRxWVFuaS9FZSRqRHNNN3pnb1RoL01QeHJZTjlxVlEvCg==
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: admin-auth
+  namespace: traefik
+spec:
+  basicAuth:
+    secret: admin-dashboard-auth
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`traefik.lab.local`)
+      services:
+        - name: api@internal
+          kind: TraefikService
+      middlewares:
+        - name: admin-auth
+  # tls:
+  #   certResolver: letsencrypt
+  #   domains:
+  #     - main: "traefik.lab.local"

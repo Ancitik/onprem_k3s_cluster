@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lab-cert
+  namespace: cert-manager
+spec:
+  commonName: traefik.lab.local
+  secretName: lab-cert
+  dnsNames:
+    - traefik.lab.local
+    - rancher.lab.local
+    - argocd.lab.local
+    - nexus.lab.local
+    - harbor.lab.local
+    - jenkins.lab.local
+    - whoami.lab.local
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

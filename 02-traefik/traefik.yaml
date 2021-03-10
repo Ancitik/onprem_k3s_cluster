@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  repo: https://helm.traefik.io/traefik
+  chart: traefik
+  bootstrap: true
+  targetNamespace: traefik
+  valuesContent: |-
+
+    additionalArguments:
+      - "--ping"
+      - "--certificatesresolvers.myresolver.acme.email=your.email@mail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/data/acme.json"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      # # Let's Encrypt staging API:
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      # # Let's Encrypt production API:
+      # - "--certificatesresolvers.myresolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+      # If you want to use jaeger tracing for traefik uncomment these lines and adjust them to your jaeger installation
+      # - "--tracing=true"
+      # - "--tracing.serviceName=traefik"
+      # - "--tracing.jaeger=true"
+      # - "--tracing.jaeger.propagation=jaeger"
+      # - "--tracing.jaeger.traceContextHeaderName=uber-trace-id"
+      # - "--tracing.jaeger.samplingServerURL=http://jaeger-agent.jaeger.svc.cluster.local:5778/sampling"
+      # - "--tracing.jaeger.localAgentHostPort=jaeger-agent.jaeger.svc.cluster.local:6831"
+      # - "--tracing.jaeger.collector.endpoint=http://jaeger-collector.jaeger.svc.cluster.local:14268/api/traces?format=jaeger.thrift"
+      # If you want to use prometheus monitoring for traefik uncomment these lines
+      # - "--metrics=true"
+      # - "--metrics.prometheus=true"
+      # - "--metrics.prometheus.addServicesLabels=true"
+
+    ports:
+      websecure:
+        tls:
+          enabled: true
+          certResolver: "myresolver"
+
+    ingressClass:
+      # true is not unit-testable yet, pending https://github.com/rancher/helm-unittest/pull/12
+      enabled: true
+      isDefaultClass: true
+
+    persistence:
+      enabled: true
+      path: /data
+      storageClass: "longhorn"
+
+    logs:
+      general:
+        level: INFO
+      access:
+        enabled: true
+    
+    providers:
+      kubernetesCRD:
+        enabled: true
+      kubernetesIngress:
+        enabled: true
+        namespaces: []
+          # - "default"
+        # IP used for Kubernetes Ingress endpoints
+        publishedService:
+          enabled: true
+
+    # podAnnotations: 
+    #   prometheus.io/port: '8082'
+    #   prometheus.io/scrape: 'true'
+    # We will apply our own ingress rule for the dashboard in the next step
+    
+    ingressRoute:
+      dashboard:
+        enabled: false

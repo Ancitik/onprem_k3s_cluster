@@ -1,0 +1,9 @@
+ingress:
+  enabled: true
+  annotations:
+    certmanager.k8s.io/acme-challenge-type: "http01"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    kubernetes.io/ingress.class: "traefik"
+  path: /
+  hosts:
+    - mockserver.lab.local

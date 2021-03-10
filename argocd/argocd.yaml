@@ -1,0 +1,21 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: argocd
+  namespace: kube-system
+spec:
+  chart: argo-cd
+  repo: https://argoproj.github.io/argo-helm
+  targetNamespace: argocd
+  valuesContent: |-
+    server:
+      extraArgs:
+        - --insecure
+      ingress:
+        enabled: true
+        annotations:
+          certmanager.k8s.io/acme-challenge-type: "http01"
+          cert-manager.io/cluster-issuer: "letsencrypt-staging"
+          kubernetes.io/ingress.class: "traefik"
+        hosts:
+          - argocd.lab.local

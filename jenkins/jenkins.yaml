@@ -1,0 +1,29 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: jenkins
+  namespace: kube-system
+spec:
+  chart: jenkins
+  repo: https://charts.jenkins.io
+  targetNamespace: jenkins
+  valuesContent: |-
+
+    controller:
+      adminUser: "admin"
+      adminPassword: "admin123"
+      ingress:
+        enabled: true
+        apiVersion: "extensions/v1beta1"
+        labels: {}
+        annotations:
+          certmanager.k8s.io/acme-challenge-type: "http01"
+          cert-manager.io/cluster-issuer: "letsencrypt-staging"
+          kubernetes.io/ingress.class: "traefik"
+        hostName: jenkins.lab.local
+        tls:
+          - secretName: jenkins.lab.local
+            hosts:
+              - jenkins.lab.local
+      additionalPlugins:
+        - blueocean:1.24.3

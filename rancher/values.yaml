@@ -1,0 +1,15 @@
+hostname: "rancher.lab.local"
+
+ingress:
+  extraAnnotations:
+    certmanager.k8s.io/acme-challenge-type: "http01"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    kubernetes.io/ingress.class: "traefik"
+
+tls: external
+
+# letsEncrypt:
+#   email: support@lab.local
+#   environment: staging
+#   ingress:
+#     class: "traefik"
